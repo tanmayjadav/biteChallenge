@@ -19,7 +19,7 @@ const nodeTypes = {
   text: CustomTextNode,
 };
 
-let id = JSON.parse(localStorage.getItem('flow')).edges.length+2 || 1;
+let id = JSON.parse(localStorage.getItem('flow'))?.edges?.length+2 || 1;
 
 const getId = () => {
   return `${id++}`;
@@ -43,37 +43,20 @@ export default function App() {
 
           return eds;
         } else if (eds && eds.some(e => e.target === params.target)) {
-          // if the target node is already connected to another node
-          // then do nothing
           return addEdge({...params}, eds);
         } else {
-          // if the source and target nodes are not connected to any other nodes
-          // then add the custom edge
-          // basically the custom edge, renders an arrow icon at the target node
           return addEdge({...params, type: 'custom-edge'}, eds);
         }
-
-        // addEdge(params, eds)
       }),
     [],
   );
 
-  /**
-   * dragover event handler to prevent default behavior
-   * and set the drop effect to move
-   */
+
   const onDragOver = useCallback(event => {
     event.preventDefault();
     event.dataTransfer.dropEffect = 'move';
   }, []);
 
-  /**
-   * drop event handler to add a new node to the flow
-   * whenever a node is dropped on the flow
-   * it will create a new node with the type of the dropped element
-   * and add it to the nodes array
-   * and set the position of the new node to the mouse position
-   */
   const onDrop = useCallback(
     event => {
       event.preventDefault();
@@ -101,16 +84,8 @@ export default function App() {
     [reactFlowInstance],
   );
 
-  /**
-   * on click handler for the nodes
-   * to select the node and show the editor
-   */
   const onNodeClick = (_, node) => setSelectedNode(node);
 
-  /**
-   * the core function to update the selected node value
-   * whenever a node is selected and edited
-   */
   const updateSelectedNode = value => {
     if (!selectedNode) {
       return;
@@ -127,22 +102,15 @@ export default function App() {
     );
   };
 
-  /**
-   * if there are more than one nodes,
-   * and any one of the node does not have a connection from source to target
-   * then the flow is invalid
-   */
   const validateFlow = () => {
     const sourceNodes = new Set();
     const targetNodes = new Set();
 
-    // collect all source and target nodes
     edges.forEach(edge => {
       sourceNodes.add(edge.source);
       targetNodes.add(edge.target);
     });
 
-    // check for nodes without source and target handles
     const nodesWithoutSourceAndTarget = nodes.filter(
       node => !sourceNodes.has(node.id) && !targetNodes.has(node.id),
     );
